@@ -1,0 +1,7 @@
+Location,BestModel
+Hospital_1,XGBoost
+Hospital_2,RandomForest
+Hospital_3,RandomForest
+Hospital_4,RandomForest
+Hospital_5,RandomForest
+Hospital_6,RandomForest
