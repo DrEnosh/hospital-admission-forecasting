@@ -487,16 +487,43 @@ table.pred-tbl tr:hover td{{background:rgba(20,184,166,0.02)}}
   .kpi-card{{padding:1rem}}
   .kpi-card .kpi-value{{font-size:1.3rem}}
 
-  /* Table Mobile Scroll */
+  /* Table Mobile Card/Flow */
   .pred-table-wrap{{
-    overflow-x:auto;
-    -webkit-overflow-scrolling:touch;
+    overflow-x:hidden;
   }}
   table.pred-tbl{{
-    min-width:600px; /* Forces horizontal scrolling instead of squishing columns */
+    min-width: 100% !important;
+  }}
+  /* Hide the DOW, Avg/Day, and standalone Model columns to prevent horizontal scrolling */
+  table.pred-tbl th:nth-child(3), table.pred-tbl td:nth-child(3),
+  table.pred-tbl th:nth-child(4), table.pred-tbl td:nth-child(4),
+  table.pred-tbl th:nth-child(5), table.pred-tbl td:nth-child(5) {{
+    display:none !important;
+  }}
+  /* Ensure the remaining columns stretch nicely */
+  table.pred-tbl th:nth-child(1), table.pred-tbl td:nth-child(1) {{
+    width: 45%;
+  }}
+  table.pred-tbl th:nth-child(2), table.pred-tbl td:nth-child(2) {{
+    width: 30%;
+  }}
+  table.pred-tbl th:last-child, table.pred-tbl td:last-child {{
+    width: 25%;
+    text-align: right;
+  }}
+  .mobile-model-tag{{
+    display:block;
+    font-size:.65rem;
+    color:var(--text-muted);
+    margin-left:14px;
+    margin-top:2px;
   }}
   .pred-table-header{{padding:1rem}}
   table.pred-tbl th, table.pred-tbl td{{padding:.8rem 1rem;font-size:.8rem}}
+}}
+
+@media(min-width:769px){{
+  .mobile-model-tag{{display:none}}
 }}
 
 @media(max-width:480px){{
@@ -869,11 +896,16 @@ function renderResults(mode, label, rows, total, periodDays, numLocs) {{
   const dowCol = mode === 'daily';
   let tableRows = '';
   rows.forEach(r => {{
+    const modelTag = modelNames[r.model]||r.model;
     tableRows += `<tr>
-      <td><span class="loc-dot" style="background:${{COLORS[r.loc]}}"></span>${{r.loc.replace(/_/g,' ')}}</td>
+      <td>
+        <span class="loc-dot" style="background:${{COLORS[r.loc]}}"></span>
+        ${{r.loc.replace(/_/g,' ')}}
+        <span class="mobile-model-tag">${{modelTag}}</span>
+      </td>
       <td style="font-weight:700;color:var(--text)">${{fmt(r.val)}}</td>
       ${{dowCol ? `<td>${{r.dow}}</td><td>${{r.weight.toFixed(2)}}x</td>` : `<td>${{fmt(r.daily)}}</td>`}}
-      <td>${{modelNames[r.model]||r.model}}</td>
+      <td>${{modelTag}}</td>
       <td>${{accPill(r.acc)}}</td>
     </tr>`;
   }});
