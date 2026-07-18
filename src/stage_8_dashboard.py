@@ -494,10 +494,9 @@ table.pred-tbl tr:hover td{{background:rgba(20,184,166,0.02)}}
   table.pred-tbl{{
     min-width: 100% !important;
   }}
-  /* Hide the DOW, Avg/Day, and standalone Model columns to prevent horizontal scrolling */
-  table.pred-tbl th:nth-child(3), table.pred-tbl td:nth-child(3),
-  table.pred-tbl th:nth-child(4), table.pred-tbl td:nth-child(4),
-  table.pred-tbl th:nth-child(5), table.pred-tbl td:nth-child(5) {{
+  /* Hide all columns except the 1st (Hospital), 2nd (Predicted Admissions), and last (Accuracy) */
+  table.pred-tbl th:not(:nth-child(1)):not(:nth-child(2)):not(:last-child),
+  table.pred-tbl td:not(:nth-child(1)):not(:nth-child(2)):not(:last-child) {{
     display:none !important;
   }}
   /* Ensure the remaining columns stretch nicely */
