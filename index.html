@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hospital Admission Forecasting System</title>
+<meta name="description" content="Multi-Hospital Admission Forecasting Decision Support System">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --white:#FFFFFF;--bg:#F4F7FA;--card:#FFFFFF;
+  --border:#E2E8F0;--border-hover:#CBD5E1;
+  --text:#1E293B;--text-sec:#475569;--text-muted:#94A3B8;
+  --primary:#0F766E;--primary-light:#14B8A6;--primary-bg:rgba(20,184,166,0.06);
+  --accent:#0284C7;--accent-bg:rgba(2,132,199,0.06);
+  --success:#059669;--success-bg:rgba(5,150,105,0.08);
+  --warn:#D97706;--warn-bg:rgba(217,119,6,0.06);
+  --danger:#DC2626;--danger-bg:rgba(220,38,38,0.06);
+  --radius:12px;--radius-lg:16px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.06);
+  --shadow:0 4px 20px rgba(0,0,0,0.06);
+  --shadow-lg:0 12px 40px rgba(0,0,0,0.1);
+}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ════════════════ LOGIN ════════════════ */
+.login-overlay{
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(135deg,#F0FDFA 0%,#ECFDF5 30%,#EFF6FF 70%,#F0F9FF 100%);
+  display:flex;align-items:center;justify-content:center;
+}
+.login-card{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:3rem;width:100%;max-width:420px;
+  box-shadow:var(--shadow-lg);text-align:center;
+  animation:loginFade .5s ease;
+}
+@keyframes loginFade{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.login-logo{
+  width:64px;height:64px;border-radius:14px;margin:0 auto 1.5rem;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 24px rgba(15,118,110,0.25);
+}
+.login-logo svg{width:32px;height:32px;color:#fff}
+.login-card h1{font-family:'Outfit',sans-serif;font-size:1.5rem;font-weight:700;color:var(--text);margin-bottom:.3rem}
+.login-card p{color:var(--text-muted);font-size:.85rem;margin-bottom:2rem}
+.form-group{text-align:left;margin-bottom:1.2rem}
+.form-group label{display:block;font-size:.72rem;font-weight:700;color:var(--text-sec);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem}
+.form-group input{
+  width:100%;padding:.75rem 1rem;border:1.5px solid var(--border);border-radius:10px;
+  font-family:inherit;font-size:.9rem;color:var(--text);background:var(--bg);outline:none;
+  transition:all .2s;
+}
+.form-group input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(20,184,166,0.12)}
+.login-error{color:var(--danger);font-size:.8rem;margin-bottom:1rem;display:none;font-weight:600}
+.btn-login{
+  width:100%;padding:.85rem;border:none;border-radius:10px;
+  background:linear-gradient(135deg,var(--primary),var(--primary-light));
+  color:#fff;font-family:inherit;font-size:.95rem;font-weight:700;cursor:pointer;
+  transition:all .2s;box-shadow:0 4px 16px rgba(15,118,110,0.3);
+}
+.btn-login:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(15,118,110,0.4)}
+.login-footer{margin-top:1.5rem;color:var(--text-muted);font-size:.7rem}
+
+/* ════════════════ APP SHELL ════════════════ */
+.app{display:none}
+.topbar{
+  background:var(--white);border-bottom:1px solid var(--border);
+  padding:0 2.5rem;height:64px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;box-shadow:var(--shadow-sm);
+}
+.topbar-brand{display:flex;align-items:center;gap:.8rem}
+.topbar-brand .logo-sm{
+  width:36px;height:36px;border-radius:8px;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  display:flex;align-items:center;justify-content:center;
+}
+.topbar-brand .logo-sm svg{width:18px;height:18px;color:#fff}
+.topbar-brand h2{font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text)}
+.topbar-right{display:flex;align-items:center;gap:1.5rem}
+.topbar-right .user-pill{
+  display:flex;align-items:center;gap:.5rem;
+  background:var(--bg);border:1px solid var(--border);border-radius:30px;padding:.35rem 1rem .35rem .35rem;
+  font-size:.8rem;font-weight:600;color:var(--text-sec);
+}
+.topbar-right .user-pill .avatar{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;
+  font-size:.7rem;font-weight:700;
+}
+.topbar-right .badge-synth{
+  background:var(--warn-bg);color:var(--warn);padding:.3rem .8rem;border-radius:20px;
+  font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+}
+.btn-logout{
+  background:none;border:1px solid var(--border);border-radius:8px;padding:.4rem .8rem;
+  font-family:inherit;font-size:.75rem;font-weight:600;color:var(--text-muted);cursor:pointer;
+  transition:all .2s;
+}
+.btn-logout:hover{background:var(--danger-bg);color:var(--danger);border-color:var(--danger)}
+
+/* Container */
+.container{max-width:1280px;margin:0 auto;padding:2rem 2.5rem}
+
+/* Category Tabs */
+.category-bar{
+  display:flex;gap:.5rem;margin-bottom:2rem;
+  background:var(--white);border:1px solid var(--border);padding:.4rem;border-radius:var(--radius);
+  box-shadow:var(--shadow-sm);max-width:fit-content;
+}
+.cat-btn{
+  padding:.7rem 2rem;border:none;border-radius:9px;background:transparent;
+  font-family:inherit;font-size:.85rem;font-weight:600;color:var(--text-muted);cursor:pointer;
+  transition:all .2s;display:flex;align-items:center;gap:.5rem;
+}
+.cat-btn:hover{color:var(--text);background:var(--bg)}
+.cat-btn.active{background:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(15,118,110,0.25)}
+.cat-btn .cat-icon{font-size:1rem}
+
+/* Controls Row */
+.controls{
+  display:flex;gap:1.5rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:2rem;
+  background:var(--white);border:1px solid var(--border);border-radius:var(--radius);
+  padding:1.5rem 2rem;box-shadow:var(--shadow-sm);
+}
+.ctrl-group{display:flex;flex-direction:column;gap:.4rem;flex:1;min-width:160px}
+.ctrl-group label{
+  font-size:.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;
+  display:flex;align-items:center;gap:.35rem;
+}
+.ctrl-group label .lbl-icon{font-size:.82rem;opacity:.7}
+.ctrl-group select{
+  padding:.7rem 2.2rem .7rem 1rem;border:1.5px solid var(--border);border-radius:9px;
+  font-family:inherit;font-size:.85rem;color:var(--text);background:var(--bg);outline:none;
+  transition:all .25s ease;cursor:pointer;
+  -webkit-appearance:none;-moz-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right .8rem center;
+}
+.ctrl-group select:hover{border-color:var(--border-hover);background-color:#f8fafc}
+.ctrl-group select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(20,184,166,0.1);background-color:var(--white)}
+.date-row{display:flex;gap:.5rem}
+.date-row .ctrl-sub{display:flex;flex-direction:column;gap:.4rem;flex:1;min-width:0}
+.date-row .ctrl-sub label{font-size:.62rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em}
+.date-row .ctrl-sub select{
+  padding:.7rem 1.8rem .7rem .7rem;border:1.5px solid var(--border);border-radius:9px;
+  font-family:inherit;font-size:.82rem;color:var(--text);background:var(--bg);outline:none;
+  transition:all .25s ease;cursor:pointer;
+  -webkit-appearance:none;-moz-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right .55rem center;
+}
+.date-row .ctrl-sub select:hover{border-color:var(--border-hover)}
+.date-row .ctrl-sub select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(20,184,166,0.1)}
+.btn-predict{
+  padding:.72rem 2rem;border:none;border-radius:9px;
+  background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;
+  font-family:inherit;font-size:.85rem;font-weight:700;
+  cursor:pointer;transition:all .25s ease;box-shadow:0 3px 12px rgba(15,118,110,0.2);
+  display:flex;align-items:center;gap:.5rem;white-space:nowrap;
+}
+.btn-predict:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(15,118,110,0.35)}
+
+/* Results */
+.results{animation:resultsIn .3s ease}
+@keyframes resultsIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Summary KPI strip */
+.kpi-strip{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2rem;
+}
+.kpi-card{
+  background:var(--white);border:1px solid var(--border);border-radius:var(--radius);
+  padding:1.2rem 1.5rem;box-shadow:var(--shadow-sm);transition:all .2s;
+}
+.kpi-card:hover{box-shadow:var(--shadow);border-color:var(--border-hover)}
+.kpi-card .kpi-label{font-size:.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem}
+.kpi-card .kpi-value{font-family:'Outfit',sans-serif;font-size:1.6rem;font-weight:700;color:var(--text)}
+.kpi-card .kpi-sub{font-size:.75rem;color:var(--text-muted);margin-top:.2rem}
+
+/* Prediction Table */
+.pred-table-wrap{
+  background:var(--white);border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow-sm);overflow:hidden;
+}
+.pred-table-header{
+  padding:1.2rem 1.8rem;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.pred-table-header h3{font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;color:var(--text)}
+.pred-table-header .mode-badge{
+  padding:.3rem .8rem;border-radius:20px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+}
+.mode-monthly{background:var(--primary-bg);color:var(--primary)}
+.mode-weekly{background:var(--accent-bg);color:var(--accent)}
+.mode-daily{background:var(--success-bg);color:var(--success)}
+table.pred-tbl{width:100%;border-collapse:collapse;font-size:.85rem}
+table.pred-tbl th{
+  text-align:left;padding:.85rem 1.8rem;font-size:.7rem;font-weight:700;
+  color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;
+  background:var(--bg);border-bottom:1px solid var(--border);
+}
+table.pred-tbl td{
+  padding:.9rem 1.8rem;border-bottom:1px solid var(--border);color:var(--text-sec);
+  transition:all .15s;
+}
+table.pred-tbl tr:last-child td{border-bottom:none}
+table.pred-tbl tr:hover td{background:rgba(20,184,166,0.02)}
+.loc-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:.6rem;vertical-align:middle}
+.accuracy-pill{
+  display:inline-block;padding:.2rem .6rem;border-radius:20px;font-size:.72rem;font-weight:700;
+}
+.acc-high{background:var(--success-bg);color:var(--success)}
+.acc-mid{background:var(--warn-bg);color:var(--warn)}
+.acc-low{background:var(--danger-bg);color:var(--danger)}
+
+/* Footer */
+.app-footer{
+  text-align:center;padding:2.5rem;color:var(--text-muted);font-size:.72rem;
+  border-top:1px solid var(--border);margin-top:3rem;
+}
+
+@media(max-width:768px){
+  .container{padding:1.2rem}
+  .controls{flex-direction:column}
+  .kpi-strip{grid-template-columns:1fr 1fr}
+  table.pred-tbl th,table.pred-tbl td{padding:.7rem 1rem;font-size:.78rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════ LOGIN SCREEN ════════════════ -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+      </svg>
+    </div>
+    <h1>Admission Forecasting</h1>
+    <p>Decision Support System &mdash; Authorized Access Only</p>
+    <div class="login-error" id="loginError">Invalid credentials. Please try again.</div>
+    <div class="form-group">
+      <label>User ID</label>
+      <input type="text" id="loginUser" placeholder="Enter your user ID" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="Enter your password">
+    </div>
+    <button class="btn-login" onclick="doLogin()">Sign In</button>
+    <div class="login-footer">Dataset Type: Synthetic &bull; Multi-Hospital Forecasting Study &copy; 2026</div>
+  </div>
+</div>
+
+<!-- ════════════════ APP ════════════════ -->
+<div class="app" id="appMain">
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <div class="logo-sm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+        </svg>
+      </div>
+      <h2>Hospital Admission Forecasting</h2>
+    </div>
+    <div class="topbar-right">
+      <span class="badge-synth">Synthetic Data</span>
+      <div class="user-pill">
+        <span class="avatar">A</span>
+        admin
+      </div>
+      <button class="btn-logout" onclick="doLogout()">Sign Out</button>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- Category Tabs -->
+    <div class="category-bar">
+      <button class="cat-btn active" data-mode="monthly" onclick="setMode('monthly',this)">
+        <span class="cat-icon">&#128197;</span> Monthly Forecast
+      </button>
+      <button class="cat-btn" data-mode="weekly" onclick="setMode('weekly',this)">
+        <span class="cat-icon">&#128198;</span> Weekly Forecast
+      </button>
+      <button class="cat-btn" data-mode="daily" onclick="setMode('daily',this)">
+        <span class="cat-icon">&#128336;</span> Daily Forecast
+      </button>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <div class="ctrl-group" id="ctrlDate">
+        <label><span class="lbl-icon">&#128197;</span> <span id="dateLabel">Select Period</span></label>
+        <div class="date-row">
+          <div class="ctrl-sub">
+            <label>Month</label>
+            <select id="selMonth">
+              <option value="07">July</option><option value="08">August</option>
+              <option value="09">September</option><option value="10">October</option>
+              <option value="11">November</option><option value="12">December</option>
+              <option value="01">January</option><option value="02">February</option>
+              <option value="03">March</option><option value="04">April</option>
+              <option value="05">May</option><option value="06">June</option>
+            </select>
+          </div>
+          <div class="ctrl-sub">
+            <label>Year</label>
+            <select id="selYear">
+              <option value="2026">2026</option><option value="2027">2027</option>
+            </select>
+          </div>
+          <div class="ctrl-sub" id="dayGroup" style="display:none">
+            <label>Day</label>
+            <select id="selDay"></select>
+          </div>
+        </div>
+      </div>
+      <div class="ctrl-group">
+        <label><span class="lbl-icon">&#127973;</span> Hospital</label>
+        <select id="inputLocation">
+          <option value="all">All Hospitals</option>
+        </select>
+      </div>
+      <div class="ctrl-group">
+        <label><span class="lbl-icon">&#9881;</span> Forecasting Model</label>
+        <select id="inputModel">
+          <option value="best">Best Model (Auto)</option>
+          <option value="SARIMA">SARIMA</option>
+          <option value="ETS">ETS (Holt-Winters)</option>
+          <option value="Prophet">Prophet</option>
+          <option value="XGBoost">XGBoost</option>
+          <option value="RandomForest">Random Forest</option>
+        </select>
+      </div>
+      <button class="btn-predict" onclick="predict()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Generate Prediction
+      </button>
+    </div>
+
+    <!-- Results Area -->
+    <div id="resultsArea"></div>
+
+  </div>
+
+  <footer class="app-footer">
+    <p>Dataset Type: Synthetic &mdash; All data is anonymized and generated for demonstration purposes.</p>
+    <p>Multi-Hospital Admission Forecasting and Decision Support Study &copy; 2026</p>
+  </footer>
+
+</div>
+
+<script>
+const LOCATIONS = ["Hospital_1", "Hospital_2", "Hospital_3", "Hospital_4", "Hospital_5", "Hospital_6"];
+const COLORS = {"Hospital_1": "#6366F1", "Hospital_2": "#8B5CF6", "Hospital_3": "#EC4899", "Hospital_4": "#F59E0B", "Hospital_5": "#10B981", "Hospital_6": "#06B6D4"};
+const monthlyData = {"Hospital_1": {"months": ["2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06"], "admissions": [1095, 1223, 974, 1250, 1290, 1622, 1712, 1517, 1633, 1591, 1729, 1333, 1743, 1578, 1685, 1818, 1996, 2239, 2164, 2144, 2173, 2107, 1973, 1841, 2437, 2142, 2340, 2338, 2450, 2783, 2547, 2343, 2617, 2614, 2275, 2452, 2903, 2577, 2698, 2457, 2710, 3032, 2858, 2802, 2793, 2736, 2274, 2976, 2994, 3258]}, "Hospital_2": {"months": ["2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06"], "admissions": [280, 310, 337, 241, 387, 326, 381, 369, 365, 402, 403, 380, 408, 411, 391, 325, 506, 426, 441, 444, 510, 556, 494, 428, 469, 449, 362, 396, 417, 361, 413, 423, 422, 473, 405, 398, 438, 482, 478, 490, 485, 545]}, "Hospital_3": {"months": ["2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06"], "admissions": [367, 381, 493, 327, 375, 543, 320, 413, 470, 453, 518, 449, 483, 482, 522, 364, 536, 472, 582, 487, 477, 513, 501, 408, 448, 430, 465, 364, 562, 469, 495, 543, 495, 521, 485, 525, 523, 528, 439, 492, 618, 408, 590, 467, 482, 508, 469, 534, 486, 504, 396, 712, 452, 640]}, "Hospital_4": {"months": ["2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06"], "admissions": [970, 800, 988, 879, 875, 837, 760, 890, 806, 884, 657, 898, 813, 878, 881, 847, 1006, 918, 981, 961, 924, 987, 802, 1074, 955, 1156, 1100, 1067, 1290, 1180, 1097, 1124, 1155, 903, 1079, 1301, 1079, 1253, 1120, 1157, 1355, 1171, 1192, 1189, 1037, 1029, 1243, 1033, 1252]}, "Hospital_5": {"months": ["2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06"], "admissions": [2270, 1863, 2140, 2281, 2572, 2527, 2259, 2461, 2251, 2468, 1801, 2502, 2147, 2323, 2343, 2513, 2690, 2488, 2287, 2449, 2327, 2259, 2084, 2642, 2162, 2295, 2174, 2449, 2564, 2397, 2297, 2370, 2196, 1892, 2492, 2629, 1841, 2076, 2009, 2274, 2572, 2298, 2123, 2445, 2416, 2074, 2594, 2493, 2759]}, "Hospital_6": {"months": ["2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06"], "admissions": [640, 807, 700, 643, 690, 693, 669, 586, 736, 756, 702, 736, 797, 790, 712, 649, 737, 767, 693, 770, 798, 711, 854, 757, 771, 860, 785, 717, 814, 672, 708, 835, 792, 819]}};
+const fcData = {"Hospital_1": {"months": ["2026-07", "2026-08", "2026-09", "2026-10", "2026-11", "2026-12", "2027-01", "2027-02", "2027-03", "2027-04", "2027-05", "2027-06"], "SARIMA": [2979, 2732, 3009, 3327, 3165, 3135, 3078, 3012, 2534, 3313, 3266, 3622], "SARIMA_lower": [2608, 2358, 2627, 2938, 2769, 2732, 2668, 2594, 2109, 2882, 2828, 3178], "SARIMA_upper": [3350, 3107, 3390, 3717, 3562, 3539, 3489, 3429, 2958, 3744, 3704, 4066], "ETS": [2893, 2952, 3074, 3373, 3268, 3146, 3225, 3170, 2925, 3062, 3266, 3297], "Prophet": [2879, 2921, 3114, 3491, 3328, 3168, 3284, 3185, 3308, 2836, 3449, 3228], "Prophet_lower": [2772, 2815, 3001, 3387, 3221, 3063, 3171, 3078, 3198, 2727, 3338, 3122], "Prophet_upper": [2980, 3033, 3217, 3600, 3440, 3274, 3379, 3295, 3421, 2940, 3554, 3341], "XGBoost": [2644, 2692, 2694, 2925, 2863, 2840, 2707, 2780, 2615, 2856, 2861, 2840], "RandomForest": [2771, 2769, 2793, 2825, 2825, 2821, 2798, 2798, 2656, 2797, 2794, 2803]}, "Hospital_2": {"months": ["2026-07", "2026-08", "2026-09", "2026-10", "2026-11", "2026-12", "2027-01", "2027-02", "2027-03", "2027-04", "2027-05", "2027-06"], "SARIMA": [604, 637, 679, 750, 714, 709, 765, 800, 791, 807, 848, 870], "SARIMA_lower": [509, 540, 570, 622, 559, 523, 544, 543, 495, 473, 474, 456], "SARIMA_upper": [699, 735, 787, 878, 868, 895, 986, 1057, 1086, 1142, 1222, 1284], "ETS": [534, 529, 551, 603, 541, 494, 532, 540, 501, 470, 560, 520], "Prophet": [386, 377, 377, 411, 379, 351, 353, 347, 339, 258, 355, 296], "Prophet_lower": [360, 351, 351, 385, 353, 324, 326, 320, 313, 229, 323, 267], "Prophet_upper": [413, 402, 404, 434, 406, 377, 379, 374, 369, 286, 386, 327], "XGBoost": [478, 482, 484, 483, 465, 456, 466, 446, 441, 445, 453, 451], "RandomForest": [473, 468, 467, 468, 468, 468, 463, 461, 457, 454, 456, 452]}, "Hospital_3": {"months": ["2026-07", "2026-08", "2026-09", "2026-10", "2026-11", "2026-12", "2027-01", "2027-02", "2027-03", "2027-04", "2027-05", "2027-06"], "SARIMA": [575, 583, 584, 610, 571, 634, 595, 611, 504, 767, 588, 688], "SARIMA_lower": [434, 438, 422, 432, 380, 429, 378, 382, 264, 517, 327, 418], "SARIMA_upper": [715, 729, 747, 788, 763, 839, 812, 839, 744, 1017, 848, 959], "ETS": [721, 721, 731, 760, 770, 715, 750, 747, 751, 735, 901, 804], "Prophet": [565, 527, 541, 563, 568, 522, 537, 530, 629, 440, 574, 586], "Prophet_lower": [503, 470, 480, 504, 509, 462, 477, 468, 571, 378, 512, 530], "Prophet_upper": [623, 584, 603, 623, 627, 580, 595, 590, 688, 501, 631, 643], "XGBoost": [567, 512, 511, 513, 499, 509, 499, 510, 490, 507, 480, 505], "RandomForest": [556, 541, 542, 540, 538, 542, 542, 541, 540, 549, 549, 553]}, "Hospital_4": {"months": ["2026-07", "2026-08", "2026-09", "2026-10", "2026-11", "2026-12", "2027-01", "2027-02", "2027-03", "2027-04", "2027-05", "2027-06"], "SARIMA": [1230, 1185, 1189, 1377, 1230, 1224, 1235, 1144, 1089, 1225, 1199, 1256], "SARIMA_lower": [1009, 955, 953, 1136, 983, 972, 977, 882, 821, 952, 922, 974], "SARIMA_upper": [1452, 1415, 1425, 1618, 1477, 1476, 1492, 1406, 1356, 1497, 1476, 1538], "ETS": [1340, 1323, 1286, 1482, 1339, 1318, 1355, 1274, 1227, 1249, 1392, 1381], "Prophet": [1326, 1352, 1303, 1473, 1335, 1336, 1381, 1320, 1336, 1129, 1476, 1448], "Prophet_lower": [1246, 1269, 1217, 1384, 1252, 1256, 1302, 1236, 1255, 1044, 1392, 1359], "Prophet_upper": [1411, 1433, 1391, 1552, 1421, 1424, 1475, 1407, 1426, 1209, 1563, 1534], "XGBoost": [1177, 1127, 1160, 1243, 1149, 1192, 1142, 1172, 1140, 1181, 1160, 1178], "RandomForest": [1175, 1154, 1175, 1184, 1184, 1184, 1179, 1166, 1164, 1178, 1165, 1179]}, "Hospital_5": {"months": ["2026-07", "2026-08", "2026-09", "2026-10", "2026-11", "2026-12", "2027-01", "2027-02", "2027-03", "2027-04", "2027-05", "2027-06"], "SARIMA": [2020, 2326, 2567, 2807, 2570, 2385, 2638, 2541, 2344, 2678, 2825, 2655], "SARIMA_lower": [1571, 1863, 2064, 2265, 1991, 1771, 1990, 1863, 1636, 1943, 2063, 1865], "SARIMA_upper": [2470, 2790, 3069, 3349, 3150, 2999, 3285, 3220, 3051, 3413, 3587, 3445], "ETS": [2139, 2167, 2379, 2600, 2428, 2242, 2431, 2298, 2173, 2243, 2567, 2236], "Prophet": [2033, 2086, 2258, 2465, 2302, 2105, 2269, 2116, 2230, 1804, 2361, 2021], "Prophet_lower": [1887, 1941, 2122, 2320, 2155, 1955, 2123, 1956, 2083, 1656, 2198, 1862], "Prophet_upper": [2183, 2235, 2410, 2612, 2454, 2255, 2419, 2267, 2378, 1953, 2501, 2162], "XGBoost": [2275, 2271, 2296, 2488, 2276, 2225, 2234, 2195, 2173, 2425, 2377, 2455], "RandomForest": [2245, 2237, 2244, 2478, 2242, 2209, 2251, 2212, 2181, 2487, 2391, 2507]}, "Hospital_6": {"months": ["2026-07", "2026-08", "2026-09", "2026-10", "2026-11", "2026-12", "2027-01", "2027-02", "2027-03", "2027-04", "2027-05", "2027-06"], "SARIMA": [920, 802, 859, 952, 824, 783, 876, 812, 800, 855, 883, 870], "SARIMA_lower": [795, 671, 728, 790, 654, 617, 695, 621, 609, 656, 674, 660], "SARIMA_upper": [1046, 933, 989, 1114, 995, 949, 1058, 1004, 990, 1055, 1092, 1081], "ETS": [845, 814, 825, 908, 822, 759, 836, 800, 779, 820, 865, 851], "Prophet": [1014, 775, 795, 937, 830, 760, 827, 841, 624, 1099, 851, 555], "Prophet_lower": [1004, 764, 784, 925, 819, 749, 816, 829, 612, 1087, 839, 542], "Prophet_upper": [1026, 787, 807, 948, 841, 771, 838, 852, 635, 1113, 865, 567], "XGBoost": [803, 801, 804, 815, 802, 770, 799, 779, 775, 772, 773, 766], "RandomForest": [793, 791, 792, 793, 781, 765, 755, 750, 766, 770, 767, 759]}};
+const bestMap = {"Hospital_1": "XGBoost", "Hospital_2": "RandomForest", "Hospital_3": "RandomForest", "Hospital_4": "RandomForest", "Hospital_5": "RandomForest", "Hospital_6": "RandomForest"};
+const metricsData = {"Hospital_1": [{"MAE": 268.57, "RMSE": 277.16, "MAPE": 9.62, "R2": 0.16, "Location": "Hospital_1", "Model": "SARIMA"}, {"MAE": 255.19, "RMSE": 305.08, "MAPE": 9.26, "R2": -0.01, "Location": "Hospital_1", "Model": "ETS"}, {"MAE": 315.1, "RMSE": 347.67, "MAPE": 11.51, "R2": -0.32, "Location": "Hospital_1", "Model": "Prophet"}, {"MAE": 197.9, "RMSE": 250.5, "MAPE": 7.18, "R2": 0.32, "Location": "Hospital_1", "Model": "XGBoost"}, {"MAE": 206.76, "RMSE": 267.98, "MAPE": 7.47, "R2": 0.22, "Location": "Hospital_1", "Model": "RandomForest"}, {"MAE": 0.01, "RMSE": 0.01, "MAPE": 0.0, "R2": 1.0, "Location": "Hospital_1", "Model": "LinearRegression"}], "Hospital_2": [{"MAE": 105.97, "RMSE": 119.37, "MAPE": 21.32, "R2": -13.54, "Location": "Hospital_2", "Model": "SARIMA"}, {"MAE": 102.5, "RMSE": 116.66, "MAPE": 20.57, "R2": -12.88, "Location": "Hospital_2", "Model": "ETS"}, {"MAE": 116.49, "RMSE": 131.11, "MAPE": 23.39, "R2": -16.54, "Location": "Hospital_2", "Model": "Prophet"}, {"MAE": 42.69, "RMSE": 47.48, "MAPE": 8.59, "R2": -1.3, "Location": "Hospital_2", "Model": "XGBoost"}, {"MAE": 34.38, "RMSE": 39.41, "MAPE": 6.9, "R2": -0.58, "Location": "Hospital_2", "Model": "RandomForest"}, {"MAE": 0.35, "RMSE": 0.37, "MAPE": 0.07, "R2": 1.0, "Location": "Hospital_2", "Model": "LinearRegression"}], "Hospital_3": [{"MAE": 120.33, "RMSE": 143.72, "MAPE": 21.79, "R2": -0.72, "Location": "Hospital_3", "Model": "SARIMA"}, {"MAE": 697.45, "RMSE": 726.44, "MAPE": 143.54, "R2": -43.06, "Location": "Hospital_3", "Model": "ETS"}, {"MAE": 119.84, "RMSE": 148.57, "MAPE": 22.38, "R2": -0.84, "Location": "Hospital_3", "Model": "Prophet"}, {"MAE": 65.36, "RMSE": 87.36, "MAPE": 11.71, "R2": 0.36, "Location": "Hospital_3", "Model": "XGBoost"}, {"MAE": 63.69, "RMSE": 80.15, "MAPE": 11.66, "R2": 0.46, "Location": "Hospital_3", "Model": "RandomForest"}, {"MAE": 0.02, "RMSE": 0.02, "MAPE": 0.0, "R2": 1.0, "Location": "Hospital_3", "Model": "LinearRegression"}], "Hospital_4": [{"MAE": 124.73, "RMSE": 161.28, "MAPE": 11.44, "R2": -1.63, "Location": "Hospital_4", "Model": "SARIMA"}, {"MAE": 156.6, "RMSE": 190.11, "MAPE": 14.52, "R2": -2.65, "Location": "Hospital_4", "Model": "ETS"}, {"MAE": 154.88, "RMSE": 183.85, "MAPE": 14.29, "R2": -2.41, "Location": "Hospital_4", "Model": "Prophet"}, {"MAE": 96.22, "RMSE": 103.88, "MAPE": 8.87, "R2": -0.09, "Location": "Hospital_4", "Model": "XGBoost"}, {"MAE": 78.68, "RMSE": 105.23, "MAPE": 7.53, "R2": -0.12, "Location": "Hospital_4", "Model": "RandomForest"}, {"MAE": 0.01, "RMSE": 0.01, "MAPE": 0.0, "R2": 1.0, "Location": "Hospital_4", "Model": "LinearRegression"}], "Hospital_5": [{"MAE": 491.99, "RMSE": 658.86, "MAPE": 19.88, "R2": -9.04, "Location": "Hospital_5", "Model": "SARIMA"}, {"MAE": 254.83, "RMSE": 341.44, "MAPE": 9.89, "R2": -1.7, "Location": "Hospital_5", "Model": "ETS"}, {"MAE": 313.16, "RMSE": 412.71, "MAPE": 12.15, "R2": -2.94, "Location": "Hospital_5", "Model": "Prophet"}, {"MAE": 228.72, "RMSE": 288.63, "MAPE": 8.91, "R2": -0.93, "Location": "Hospital_5", "Model": "XGBoost"}, {"MAE": 219.01, "RMSE": 267.37, "MAPE": 8.6, "R2": -0.65, "Location": "Hospital_5", "Model": "RandomForest"}, {"MAE": 0.01, "RMSE": 0.02, "MAPE": 0.0, "R2": 1.0, "Location": "Hospital_5", "Model": "LinearRegression"}], "Hospital_6": [{"MAE": 58.18, "RMSE": 69.31, "MAPE": 7.86, "R2": -0.29, "Location": "Hospital_6", "Model": "SARIMA"}, {"MAE": 58.17, "RMSE": 70.77, "MAPE": 7.86, "R2": -0.34, "Location": "Hospital_6", "Model": "ETS"}, {"MAE": 86.51, "RMSE": 103.2, "MAPE": 11.33, "R2": -1.85, "Location": "Hospital_6", "Model": "Prophet"}, {"MAE": 57.5, "RMSE": 59.25, "MAPE": 7.55, "R2": 0.06, "Location": "Hospital_6", "Model": "XGBoost"}, {"MAE": 50.59, "RMSE": 55.43, "MAPE": 6.7, "R2": 0.18, "Location": "Hospital_6", "Model": "RandomForest"}, {"MAE": 0.04, "RMSE": 0.05, "MAPE": 0.01, "R2": 1.0, "Location": "Hospital_6", "Model": "LinearRegression"}]};
+const deptData = {"Hospital_1": {"departments": ["Department_01", "Department_02", "Department_03", "Department_04", "Department_05", "Department_06", "Department_07", "Department_08", "Department_09", "Department_10"], "values": [18262, 10910, 9123, 6866, 6386, 5175, 4689, 4467, 4099, 3817]}, "Hospital_2": {"departments": ["Department_01", "Department_02", "Department_03", "Department_04", "Department_05", "Department_06", "Department_07", "Department_08", "Department_09", "Department_10"], "values": [2829, 2722, 2514, 2282, 1901, 1430, 1038, 795, 502, 468]}, "Hospital_3": {"departments": ["Department_01", "Department_02", "Department_03", "Department_04", "Department_05", "Department_06", "Department_07", "Department_08", "Department_09", "Department_11"], "values": [6225, 4277, 3961, 2421, 2287, 2001, 1093, 924, 844, 781]}, "Hospital_4": {"departments": ["Department_01", "Department_02", "Department_03", "Department_04", "Department_05", "Department_06", "Department_07", "Department_08", "Department_09", "Department_10"], "values": [6987, 6596, 6164, 4940, 4096, 3137, 2846, 2824, 2469, 2194]}, "Hospital_5": {"departments": ["Department_01", "Department_02", "Department_03", "Department_04", "Department_05", "Department_06", "Department_07", "Department_08", "Department_09", "Department_11"], "values": [23707, 15244, 13220, 12749, 8547, 5373, 4625, 4428, 3260, 3018]}, "Hospital_6": {"departments": ["Department_02", "Department_01", "Department_03", "Department_04", "Department_05", "Department_06", "Department_07", "Department_08", "Department_09", "Department_10"], "values": [4118, 4062, 4032, 2807, 2493, 1990, 1212, 1036, 870, 643]}};
+const statsData = {"Hospital_1": {"total": 108836, "avg_daily": 71.5, "avg_monthly": 2176.7, "months": 50, "date_start": "2022-05-01", "date_end": "2026-06-30"}, "Hospital_2": {"total": 17427, "avg_daily": 13.7, "avg_monthly": 414.9, "months": 42, "date_start": "2023-01-02", "date_end": "2026-06-30"}, "Hospital_3": {"total": 25986, "avg_daily": 15.8, "avg_monthly": 481.2, "months": 54, "date_start": "2022-01-02", "date_end": "2026-06-30"}, "Hospital_4": {"total": 49833, "avg_daily": 33.4, "avg_monthly": 1017.0, "months": 49, "date_start": "2022-06-01", "date_end": "2026-06-30"}, "Hospital_5": {"total": 113838, "avg_daily": 76.4, "avg_monthly": 2323.2, "months": 49, "date_start": "2022-06-01", "date_end": "2026-06-30"}, "Hospital_6": {"total": 25166, "avg_daily": 24.3, "avg_monthly": 740.2, "months": 34, "date_start": "2023-09-01", "date_end": "2026-06-30"}};
+const daysInMonth = {"2026-01": 31, "2026-02": 28, "2026-03": 31, "2026-04": 30, "2026-05": 31, "2026-06": 30, "2026-07": 31, "2026-08": 31, "2026-09": 30, "2026-10": 31, "2026-11": 30, "2026-12": 31, "2027-01": 31, "2027-02": 28, "2027-03": 31, "2027-04": 30, "2027-05": 31, "2027-06": 30, "2027-07": 31, "2027-08": 31, "2027-09": 30, "2027-10": 31, "2027-11": 30, "2027-12": 31};
+const dowWeights = {"Hospital_1": {"0": 1.1492, "1": 1.1523, "2": 1.1627, "3": 1.1333, "4": 0.9909, "5": 0.5277, "6": 0.884}, "Hospital_2": {"0": 1.1524, "1": 1.1106, "2": 1.1142, "3": 1.187, "4": 0.8596, "5": 0.6282, "6": 0.948}, "Hospital_3": {"0": 0.998, "1": 1.2391, "2": 1.2224, "3": 1.1785, "4": 1.1284, "5": 0.0822, "6": 1.1513}, "Hospital_4": {"0": 1.1429, "1": 1.0871, "2": 1.1624, "3": 1.1229, "4": 0.9895, "5": 0.8236, "6": 0.6717}, "Hospital_5": {"0": 1.1843, "1": 1.1274, "2": 1.1411, "3": 1.0998, "4": 0.9037, "5": 0.4504, "6": 1.0933}, "Hospital_6": {"0": 1.1376, "1": 1.1229, "2": 1.1034, "3": 1.0767, "4": 1.0837, "5": 0.8648, "6": 0.6108}};
+
+const modelNames = {SARIMA:'SARIMA',ETS:'ETS',Prophet:'Prophet',XGBoost:'XGBoost',RandomForest:'Random Forest'};
+let currentMode = 'monthly';
+
+// Populate selects
+const locSel = document.getElementById('inputLocation');
+LOCATIONS.forEach(l => {
+  locSel.innerHTML += `<option value="${l}">${l.replace(/_/g,' ')}</option>`;
+});
+
+// Enter key support on login
+document.getElementById('loginPass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('loginUser').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('loginPass').focus(); });
+
+/* ═══════ LOGIN ═══════ */
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  if (u === 'admin' && p === '1234') {
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('appMain').style.display = 'block';
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('loginPass').value = '';
+  }
+}
+function doLogout() {
+  document.getElementById('appMain').style.display = 'none';
+  document.getElementById('loginOverlay').style.display = 'flex';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginError').style.display = 'none';
+  document.getElementById('resultsArea').innerHTML = '';
+}
+
+/* ═══════ DATE HELPERS ═══════ */
+const monthNamesFull = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
+function populateDays() {
+  const m = parseInt(document.getElementById('selMonth').value);
+  const y = parseInt(document.getElementById('selYear').value);
+  const key = `${y}-${String(m).padStart(2,'0')}`;
+  const maxDay = daysInMonth[key] || 30;
+  const sel = document.getElementById('selDay');
+  const cur = parseInt(sel.value) || 1;
+  sel.innerHTML = '';
+  for (let d = 1; d <= maxDay; d++) {
+    sel.innerHTML += `<option value="${d}" ${d===Math.min(cur,maxDay)?'selected':''}>${d}</option>`;
+  }
+}
+function getDateValue() {
+  const m = document.getElementById('selMonth').value;
+  const y = document.getElementById('selYear').value;
+  if (currentMode === 'monthly') return `${y}-${m}`;
+  const d = String(document.getElementById('selDay').value).padStart(2,'0');
+  return `${y}-${m}-${d}`;
+}
+// auto-populate days when month/year changes
+document.getElementById('selMonth').addEventListener('change', () => { populateDays(); syncYearMonth(); });
+document.getElementById('selYear').addEventListener('change', () => { populateDays(); syncYearMonth(); });
+// ensure valid month-year combos (Jul-Dec 2026, Jan-Jun 2027)
+function syncYearMonth() {
+  const m = parseInt(document.getElementById('selMonth').value);
+  const y = parseInt(document.getElementById('selYear').value);
+  if (y === 2026 && m < 7) document.getElementById('selYear').value = '2027';
+  if (y === 2027 && m > 6) document.getElementById('selYear').value = '2026';
+}
+
+/* ═══════ MODE SWITCH ═══════ */
+function setMode(mode, btn) {
+  currentMode = mode;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const dayGroup = document.getElementById('dayGroup');
+  const dateLabel = document.getElementById('dateLabel');
+  if (mode === 'monthly') {
+    dayGroup.style.display = 'none';
+    dateLabel.textContent = 'Select Month';
+  } else if (mode === 'weekly') {
+    dayGroup.style.display = '';
+    populateDays();
+    dateLabel.textContent = 'Select Week Start';
+  } else {
+    dayGroup.style.display = '';
+    populateDays();
+    dateLabel.textContent = 'Select Date';
+  }
+  document.getElementById('resultsArea').innerHTML = '';
+}
+
+/* ═══════ HELPERS ═══════ */
+function fmt(n) { return Math.round(n).toLocaleString(); }
+function getAccuracy(loc, model) {
+  const m = (metricsData[loc]||[]).find(r => r.Model === model);
+  return m ? (100 - m.MAPE) : null;
+}
+function accPill(acc) {
+  if (acc === null) return '<span class="accuracy-pill acc-mid">N/A</span>';
+  const cls = acc >= 90 ? 'acc-high' : acc >= 80 ? 'acc-mid' : 'acc-low';
+  return `<span class="accuracy-pill ${cls}">${acc.toFixed(1)}%</span>`;
+}
+function getDOW(dateStr) {
+  const p = dateStr.split('-');
+  const d = new Date(p[0], p[1]-1, p[2]);
+  let dn = d.getDay()-1; if(dn===-1) dn=6;
+  return dn;
+}
+const dayNames = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+
+/* ═══════ PREDICT ═══════ */
+function predict() {
+  const dateVal = getDateValue();
+  const locVal = document.getElementById('inputLocation').value;
+  const modelVal = document.getElementById('inputModel').value;
+  if (!dateVal) return;
+
+  const locs = locVal === 'all' ? LOCATIONS : [locVal];
+
+  if (currentMode === 'monthly') predictMonthly(dateVal, locs, modelVal);
+  else if (currentMode === 'weekly') predictWeekly(dateVal, locs, modelVal);
+  else predictDaily(dateVal, locs, modelVal);
+}
+
+/* ─── MONTHLY ─── */
+function predictMonthly(monthVal, locs, modelVal) {
+  const days = daysInMonth[monthVal] || 30;
+  let total = 0;
+  const rows = [];
+  locs.forEach(loc => {
+    const fc = fcData[loc]; if(!fc) return;
+    const idx = fc.months.indexOf(monthVal); if(idx===-1) return;
+    const model = modelVal==='best' ? (bestMap[loc]||'SARIMA') : modelVal;
+    const val = (fc[model] && fc[model][idx]!==undefined) ? fc[model][idx] : 0;
+    const acc = getAccuracy(loc, model);
+    total += val;
+    rows.push({loc, val, daily: Math.round(val/days), model, acc});
+  });
+  renderResults('monthly', monthVal, rows, total, days, locs.length);
+}
+
+/* ─── WEEKLY ─── */
+function predictWeekly(startDate, locs, modelVal) {
+  const monthVal = startDate.substring(0,7);
+  const days = daysInMonth[monthVal] || 30;
+  let total = 0;
+  const rows = [];
+  // compute 7-day forecast
+  locs.forEach(loc => {
+    const fc = fcData[loc]; if(!fc) return;
+    const idx = fc.months.indexOf(monthVal); if(idx===-1) return;
+    const model = modelVal==='best' ? (bestMap[loc]||'SARIMA') : modelVal;
+    const monthlyVal = (fc[model] && fc[model][idx]!==undefined) ? fc[model][idx] : 0;
+    const baseDaily = monthlyVal / days;
+    let weekTotal = 0;
+    const startDow = getDOW(startDate);
+    for (let i = 0; i < 7; i++) {
+      const dow = (startDow + i) % 7;
+      const w = (dowWeights[loc] && dowWeights[loc][dow]!==undefined) ? dowWeights[loc][dow] : 1.0;
+      weekTotal += baseDaily * w;
+    }
+    weekTotal = Math.round(weekTotal);
+    const acc = getAccuracy(loc, model);
+    total += weekTotal;
+    rows.push({loc, val: weekTotal, daily: Math.round(weekTotal/7), model, acc});
+  });
+  // compute end date string
+  const p = startDate.split('-');
+  const sd = new Date(p[0],p[1]-1,p[2]);
+  const ed = new Date(sd); ed.setDate(ed.getDate()+6);
+  const label = startDate + ' to ' + ed.toISOString().substring(0,10);
+  renderResults('weekly', label, rows, total, 7, locs.length);
+}
+
+/* ─── DAILY ─── */
+function predictDaily(dateVal, locs, modelVal) {
+  const monthVal = dateVal.substring(0,7);
+  const days = daysInMonth[monthVal] || 30;
+  const dow = getDOW(dateVal);
+  let total = 0;
+  const rows = [];
+  locs.forEach(loc => {
+    const fc = fcData[loc]; if(!fc) return;
+    const idx = fc.months.indexOf(monthVal); if(idx===-1) return;
+    const model = modelVal==='best' ? (bestMap[loc]||'SARIMA') : modelVal;
+    const monthlyVal = (fc[model] && fc[model][idx]!==undefined) ? fc[model][idx] : 0;
+    const w = (dowWeights[loc] && dowWeights[loc][dow]!==undefined) ? dowWeights[loc][dow] : 1.0;
+    const val = Math.round((monthlyVal / days) * w);
+    const acc = getAccuracy(loc, model);
+    total += val;
+    rows.push({loc, val, daily: val, model, acc, dow: dayNames[dow], weight: w});
+  });
+  renderResults('daily', dateVal + ' (' + dayNames[dow] + ')', rows, total, 1, locs.length);
+}
+
+/* ─── RENDER ─── */
+function renderResults(mode, label, rows, total, periodDays, numLocs) {
+  const area = document.getElementById('resultsArea');
+  const modeClass = mode === 'monthly' ? 'mode-monthly' : mode === 'weekly' ? 'mode-weekly' : 'mode-daily';
+  const modeLabel = mode.charAt(0).toUpperCase() + mode.slice(1);
+
+  let kpis = `
+    <div class="kpi-strip">
+      <div class="kpi-card">
+        <div class="kpi-label">Total Predicted Admissions</div>
+        <div class="kpi-value">${fmt(total)}</div>
+        <div class="kpi-sub">${modeLabel} forecast</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Average per Hospital</div>
+        <div class="kpi-value">${fmt(Math.round(total/numLocs))}</div>
+        <div class="kpi-sub">Across ${numLocs} hospital${numLocs>1?'s':''}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Average per Day</div>
+        <div class="kpi-value">${fmt(Math.round(total/periodDays))}</div>
+        <div class="kpi-sub">${periodDays} day${periodDays>1?'s':''} in period</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Prediction Period</div>
+        <div class="kpi-value" style="font-size:1rem;line-height:1.4">${label}</div>
+        <div class="kpi-sub">${modeLabel} view</div>
+      </div>
+    </div>`;
+
+  // Extra columns for daily mode
+  const dowCol = mode === 'daily';
+  let tableRows = '';
+  rows.forEach(r => {
+    tableRows += `<tr>
+      <td><span class="loc-dot" style="background:${COLORS[r.loc]}"></span>${r.loc.replace(/_/g,' ')}</td>
+      <td style="font-weight:700;color:var(--text)">${fmt(r.val)}</td>
+      ${dowCol ? `<td>${r.dow}</td><td>${r.weight.toFixed(2)}x</td>` : `<td>${fmt(r.daily)}</td>`}
+      <td>${modelNames[r.model]||r.model}</td>
+      <td>${accPill(r.acc)}</td>
+    </tr>`;
+  });
+
+  let table = `
+    <div class="pred-table-wrap">
+      <div class="pred-table-header">
+        <h3>Admission Predictions by Hospital</h3>
+        <span class="mode-badge ${modeClass}">${modeLabel}</span>
+      </div>
+      <table class="pred-tbl">
+        <thead><tr>
+          <th>Hospital</th>
+          <th>Predicted Admissions</th>
+          ${dowCol ? '<th>Day of Week</th><th>DOW Adj.</th>' : '<th>Avg / Day</th>'}
+          <th>Model Used</th>
+          <th>Accuracy</th>
+        </tr></thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+    </div>`;
+
+  area.innerHTML = `<div class="results">${kpis}${table}</div>`;
+}
+</script>
+</body>
+</html>
