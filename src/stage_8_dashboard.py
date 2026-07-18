@@ -446,10 +446,61 @@ table.pred-tbl tr:hover td{{background:rgba(20,184,166,0.02)}}
 }}
 
 @media(max-width:768px){{
-  .container{{padding:1.2rem}}
-  .controls{{flex-direction:column}}
-  .kpi-strip{{grid-template-columns:1fr 1fr}}
-  table.pred-tbl th,table.pred-tbl td{{padding:.7rem 1rem;font-size:.78rem}}
+  /* Topbar Mobile */
+  .topbar{{padding:0 1rem;height:56px}}
+  .topbar-brand h2{{font-size:.9rem}}
+  .topbar-brand .logo-sm{{width:28px;height:28px}}
+  .topbar-brand .logo-sm svg{{width:14px;height:14px}}
+  .topbar-right{{gap:.8rem}}
+  .topbar-right .user-pill{{display:none}} /* Hide admin badge to save space */
+  .topbar-right .badge-synth{{font-size:.6rem;padding:.2rem .5rem}}
+  .btn-logout{{padding:.3rem .6rem;font-size:.7rem}}
+
+  /* Container */
+  .container{{padding:1rem .8rem}}
+
+  /* Login Card Mobile */
+  .login-card{{padding:2rem 1.5rem;max-width:90%;margin:1rem}}
+  .login-card h1{{font-size:1.3rem}}
+  .login-card p{{font-size:.8rem;margin-bottom:1.5rem}}
+
+  /* Category Bar Mobile */
+  .category-bar{{
+    display:flex;width:100%;max-width:100%;overflow-x:auto;
+    scrollbar-width:none;-ms-overflow-style:none;
+    gap:.25rem;border-radius:10px;padding:.25rem;
+  }}
+  .category-bar::-webkit-scrollbar{{display:none}}
+  .cat-btn{{
+    flex:1 0 auto;text-align:center;justify-content:center;
+    padding:.6rem 1rem;font-size:.78rem;white-space:nowrap;
+  }}
+
+  /* Controls Mobile */
+  .controls{{padding:1.2rem 1rem;gap:1.2rem}}
+  .ctrl-group{{flex:1 1 100%;width:100%;min-width:100%}}
+  .date-row{{width:100%}}
+  .btn-predict{{width:100%;justify-content:center;padding:.8rem}}
+
+  /* KPIs Mobile */
+  .kpi-strip{{grid-template-columns:1fr 1fr;gap:.8rem}}
+  .kpi-card{{padding:1rem}}
+  .kpi-card .kpi-value{{font-size:1.3rem}}
+
+  /* Table Mobile Scroll */
+  .pred-table-wrap{{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }}
+  table.pred-tbl{{
+    min-width:600px; /* Forces horizontal scrolling instead of squishing columns */
+  }}
+  .pred-table-header{{padding:1rem}}
+  table.pred-tbl th, table.pred-tbl td{{padding:.8rem 1rem;font-size:.8rem}}
+}}
+
+@media(max-width:480px){{
+  .kpi-strip{{grid-template-columns:1fr}} /* Stack KPIs on very small screens */
 }}
 </style>
 </head>
